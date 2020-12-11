@@ -1,0 +1,209 @@
+﻿
+@{
+    ViewData["Title"] = "Listado de productos";
+}
+<script type="text/javascript">
+
+
+    $(document).ready(function () {
+        ConsultAllProducts();
+        $("button").click(function () {
+            if (this.title=="editar") {
+                ConsultProduct(this.id);
+                $("#btnGuardar").hide();
+                $("#btnActualizar").show();
+            }
+            if (this.title == "eliminar") {
+                DeleteProduct(this.id)
+            }
+        });
+    });
+
+    function ConsultAllProducts() {
+        $.ajax({
+            type: "GET",
+            url: "https://localhost:44321/api/products",
+            success: function (listProducts) {
+                try {                   
+                    if (listProducts != null) {
+                        FillListProduct(listProducts);
+                    }
+                } catch (e) { }
+            }
+        });
+    }
+
+    function FillListProduct(listProducts) {
+        var valuehtml = "";
+        $.each(listProducts, function (index, prod) {
+            valuehtml += '<tr id="rowb' + prod.id + '">';
+            valuehtml += '<td>' + prod.name + '</td>';
+            valuehtml += '<td>' + prod.description + '</td>';
+            valuehtml += '<td>' + prod.categoryType + '</td>';
+            valuehtml += '<td>' + prod.price + '</td>';
+            valuehtml += '<td>' + prod.quantity + '</td>';
+            valuehtml += '<td><button id="' + prod.id + '" title="editar" >Editar</button></td>';
+            valuehtml += '<td><button id="' + prod.id + '" title="eliminar" >Eliminar</button></td>';
+            valuehtml += '</tr>';
+        });
+        $('#tProducts >tbody').html(valuehtml);
+    }
+
+    function createProduct() {
+        var parametros = {
+            Name: $("#inputNombre").val(),
+            Description: $("#inputDescripcion").val(),
+            CategoryType: $("#inputCategoria").val(),
+            Price: $("#inputPrecio").val(),
+            Quantity: $("#inputCantidad").val()
+        }
+        var valuesdata = {
+            Product: parametros
+        }
+        $.ajax({
+            type: "POST",
+            url: "https://localhost:44321/api/products/alta",
+            data: valuesdata,
+            success: function (listProducts) {
+                try {
+                    if (listProducts != null) {
+                        FillListProduct(listProducts);
+                    }
+                } catch (e) { }
+            }
+        });
+    }
+
+    function ConsultProduct(id) {
+        $.ajax({
+            type: "GET",
+            url: "https://localhost:44321/api/products/"+id,            
+            success: function (Product) {
+                try {
+                    if (Product != null) {
+                        $("#inputNombre").val(Product.name);
+                        $("#inputDescripcion").val(Product.description);
+                        $("#inputCategoria").val(Product.categoryType);
+                        $("#inputPrecio").val(Product.price);
+                        $("#inputCantidad").val(Product.quantity);
+                    }
+                } catch (e) { }
+            }
+        });
+    }
+
+    function EditProductProduct() {
+        var parametros = {
+            Name: $("#inputId").val(),
+            Name: $("#inputNombre").val(),
+            Description: $("#inputDescripcion").val(),
+            CategoryType: $("#inputCategoria").val(),
+            Price: $("#inputPrecio").val(),
+            Quantity: $("#inputCantidad").val()
+        }
+        var valuesdata = {
+            Product: parametros
+        }
+        $.ajax({
+            type: "PUT",
+            url: "https://localhost:44321/api/products",
+            data: valuesdata,
+            success: function (listProducts) {
+                try {
+                    if (listProducts != null) {
+                        FillListProduct(listProducts);
+                        $("#btnGuardar").show();
+                        $("#btnActualizar").hide();
+                    }
+                } catch (e) { }
+            }
+        });
+    }
+
+    function DeleteProduct(id) {
+        $.ajax({
+            type: "DELETE",
+            url: "https://localhost:44321/api/products/" + id,
+            success: function (listProducts) {
+                try {
+                    if (listProducts != null) {
+                        FillListProduct(listProducts);                       
+                    }
+                } catch (e) { }
+            }
+        });
+    }
+</script>
+<h2>Listado de Productos</h2>
+<button data-toggle="modal" data-target="#formProduct">Agregar</button>
+<br />
+<br />
+<table id="tProducts" class="table table-bordered table-inverse dt-responsive">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Categoria</th>
+            <th>Precio</th>
+            <th>Cantidad</th>
+            <th>Editar</th>
+            <th>Eliminar</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+<button id="confirmsuccesslogout"  >Abrir</button>
+ 
+<div class="modal fade" id="formProduct">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- successLogout Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Alta de Nuevo Producto</h4>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label class="control-label" for="inputNombre"><span style="color: red;">*</span>  Nombre</label>
+                    <input type="hidden" class="form-control" id="inputId" name="inputId">
+                    <input type="text" class="form-control" id="inputNombre" name="inputNombre" placeholder="Nombre">
+                </div>
+                <div class="form-group col-md-12">
+                    <label class="control-label" for="inputDescripcion"><span style="color: red;">*</span>  Descripcion</label>
+                    <input type="text" class="form-control" id="inputDescripcion" name="inputDescripcion" placeholder="Descripcion">
+                </div>
+                <div class="form-group col-md-12">
+                    <label class="control-label" for="inputCategoria"><span style="color: red;">*</span> Categoria</label>
+                    <select id="inputCategoria" name="inputCategoria" class="form-control">
+                        <option value="0">ELEGIR...</option>
+                        <option value="Comida">Comida</option>
+                        <option value="Servicio">Servicio</option>
+                        <option value="Salud">Salud</option>
+                        <option value="Basico">Basico</option>
+                    </select>
+
+                </div>
+
+                <div class="form-group col-md-12">
+                    <label class="control-label" for="inputPrecio"><span style="color: red;">*</span>  Precio</label>
+                    <input type="text" class="form-control" id="inputPrecio" name="inputPrecio" placeholder="Precio">
+                </div>
+
+                <div class="form-group col-md-12">
+                    <label class="control-label" for="inputCantidad"><span style="color: red;">*</span>  Cantidad</label>
+                    <input type="text" class="form-control" id="inputCantidad" name="inputCantidad" placeholder="Cantidad">
+                </div>
+            </div>
+           
+
+            <!-- successLogout footer -->
+            <div class="modal-footer">
+                <button id="btnGuardar" type="button" class="btn btn-success" data-dismiss="modal" onclick="createProduct();"> Guardar</button>
+                <button id="btnActualizar" type="button" class="btn btn-success" data-dismiss="modal" onclick="EditProductProduct();"> Guardar</button>
+
+                
+            </div>
+        </div>
+    </div>
+</div>
